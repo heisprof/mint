@@ -78,9 +78,9 @@ export default function Sidebar() {
       <div className="p-4 border-b border-sidebar-border">
         <div className="flex items-center">
           <Database className="text-sidebar-primary mr-2" />
-          <h1 className="text-xl font-bold text-sidebar-foreground">OracleWatch</h1>
+          <h1 className="text-xl font-bold text-sidebar-foreground">MINT</h1>
         </div>
-        <p className="text-xs text-sidebar-foreground/60 mt-1">Enterprise Database Monitoring</p>
+        <p className="text-xs text-sidebar-foreground/60 mt-1">Monitoring Infrastructure Tool</p>
       </div>
       
       <nav className="flex-1 overflow-y-auto py-4">
