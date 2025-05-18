@@ -80,7 +80,16 @@ export default function Sidebar() {
           <Database className="text-sidebar-primary mr-2" />
           <h1 className="text-xl font-bold text-sidebar-foreground">MINT</h1>
         </div>
-        <p className="text-xs text-sidebar-foreground/60 mt-1">Monitoring Infrastructure Tool</p>
+        <p className="text-xs text-sidebar-foreground/60 mt-1">
+          Monitoring Infrastructure Tool • <a 
+            href="https://ubunet.co.za" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-sidebar-primary hover:underline"
+          >
+            By Ubuntu Networks
+          </a>
+        </p>
       </div>
       
       <nav className="flex-1 overflow-y-auto py-4">
