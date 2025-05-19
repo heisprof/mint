@@ -16,6 +16,7 @@ import Groups from "@/pages/Groups";
 import Thresholds from "@/pages/Thresholds";
 import Integrations from "@/pages/Integrations";
 import Settings from "@/pages/Settings";
+import MetricConfig from "@/pages/MetricConfig";
 import CollapsibleSidebar from "@/components/layout/CollapsibleSidebar";
 
 function Router() {
@@ -39,6 +40,7 @@ function Router() {
           <Route path="/users" component={UserManagement} />
           <Route path="/groups" component={Groups} />
           <Route path="/thresholds" component={Thresholds} />
+          <Route path="/metrics" component={MetricConfig} />
           <Route path="/integrations" component={Integrations} />
           <Route path="/settings" component={Settings} />
           <Route component={NotFound} />

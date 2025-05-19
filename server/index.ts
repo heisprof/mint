@@ -38,6 +38,14 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Seed metric definitions
+  try {
+    await seedMetricDefinitions();
+    log("Metric definitions seeded successfully");
+  } catch (error) {
+    log("Error seeding metric definitions:", error);
+  }
+  
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {

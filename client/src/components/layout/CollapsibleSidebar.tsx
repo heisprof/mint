@@ -13,7 +13,8 @@ import {
   Settings,
   LogOut,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  BarChart3
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/lib/theme';
@@ -37,6 +38,7 @@ const configLinks: SidebarLink[] = [
   { href: '/users', icon: <Users size={18} />, label: 'User Management' },
   { href: '/groups', icon: <FolderClosed size={18} />, label: 'Groups' },
   { href: '/thresholds', icon: <Sliders size={18} />, label: 'Thresholds' },
+  { href: '/metrics', icon: <BarChart3 size={18} />, label: 'Metrics Config' },
   { href: '/integrations', icon: <Cable size={18} />, label: 'Integrations' },
   { href: '/settings', icon: <Settings size={18} />, label: 'Settings' },
 ];
