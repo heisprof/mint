@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Switch, Route, useLocation } from "wouter";
+import { Switch, Route, useLocation, Redirect } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeContext } from "@/lib/theme";
-import { AuthProvider } from "@/hooks/use-auth";
-import { ProtectedRoute } from "@/lib/protected-route";
+import { AuthProvider, useAuth } from "@/hooks/use-auth";
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/Dashboard";
 import Databases from "@/pages/Databases";
@@ -24,43 +23,52 @@ import CollapsibleSidebar from "@/components/layout/CollapsibleSidebar";
 
 function Router() {
   const [location] = useLocation();
+  const { user, isLoading } = useAuth();
   
   useEffect(() => {
     // Scroll to top on route change
     window.scrollTo(0, 0);
   }, [location]);
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <span className="animate-spin text-4xl">⌛</span>
+      </div>
+    );
+  }
+
+  // If not logged in and not on auth page, redirect to auth
+  if (!user && location !== "/auth") {
+    return <Redirect to="/auth" />;
+  }
+
   return (
     <Switch>
-      <Route path="/auth" component={AuthPage} />
+      <Route path="/auth">
+        {user ? <Redirect to="/" /> : <AuthPage />}
+      </Route>
       
-      <Route path="/">
-        {({ match }) => {
-          if (match) {
-            return (
-              <div className="flex h-screen overflow-hidden">
-                <CollapsibleSidebar />
-                <div className="flex-1 flex flex-col overflow-hidden">
-                  <Switch>
-                    <ProtectedRoute path="/" component={Dashboard} />
-                    <ProtectedRoute path="/databases" component={Databases} />
-                    <ProtectedRoute path="/system-health" component={SystemHealth} />
-                    <ProtectedRoute path="/alerts" component={Alerts} />
-                    <ProtectedRoute path="/history" component={History} />
-                    <ProtectedRoute path="/users" component={UserManagement} adminOnly />
-                    <ProtectedRoute path="/groups" component={Groups} />
-                    <ProtectedRoute path="/thresholds" component={Thresholds} />
-                    <ProtectedRoute path="/metrics" component={MetricConfig} />
-                    <ProtectedRoute path="/integrations" component={Integrations} adminOnly />
-                    <ProtectedRoute path="/settings" component={Settings} adminOnly />
-                    <Route component={NotFound} />
-                  </Switch>
-                </div>
-              </div>
-            );
-          }
-          return null;
-        }}
+      <Route>
+        <div className="flex h-screen overflow-hidden">
+          <CollapsibleSidebar />
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <Switch>
+              <Route path="/" exact component={Dashboard} />
+              <Route path="/databases" component={Databases} />
+              <Route path="/system-health" component={SystemHealth} />
+              <Route path="/alerts" component={Alerts} />
+              <Route path="/history" component={History} />
+              <Route path="/users" component={UserManagement} />
+              <Route path="/groups" component={Groups} />
+              <Route path="/thresholds" component={Thresholds} />
+              <Route path="/metrics" component={MetricConfig} />
+              <Route path="/integrations" component={Integrations} />
+              <Route path="/settings" component={Settings} />
+              <Route component={NotFound} />
+            </Switch>
+          </div>
+        </div>
       </Route>
     </Switch>
   );

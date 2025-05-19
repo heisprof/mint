@@ -41,6 +41,21 @@ function handleError(res: Response, error: unknown) {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Check authentication middleware for protected endpoints
+  const requireAuth = (req: Request, res: Response, next: Function) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: 'Authentication required' });
+    }
+    next();
+  };
+  
+  // Check admin role middleware
+  const requireAdmin = (req: Request, res: Response, next: Function) => {
+    if (!req.isAuthenticated() || req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Admin privileges required' });
+    }
+    next();
+  };
   // User routes
   app.get('/api/users', async (req: Request, res: Response) => {
     try {
