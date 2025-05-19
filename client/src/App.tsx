@@ -35,25 +35,32 @@ function Router() {
       <Route path="/auth" component={AuthPage} />
       
       <Route path="/">
-        <div className="flex h-screen overflow-hidden">
-          <CollapsibleSidebar />
-          <div className="flex-1 flex flex-col overflow-hidden">
-            <Switch>
-              <ProtectedRoute path="/" component={Dashboard} />
-              <ProtectedRoute path="/databases" component={Databases} />
-              <ProtectedRoute path="/system-health" component={SystemHealth} />
-              <ProtectedRoute path="/alerts" component={Alerts} />
-              <ProtectedRoute path="/history" component={History} />
-              <ProtectedRoute path="/users" component={UserManagement} adminOnly />
-              <ProtectedRoute path="/groups" component={Groups} />
-              <ProtectedRoute path="/thresholds" component={Thresholds} />
-              <ProtectedRoute path="/metrics" component={MetricConfig} />
-              <ProtectedRoute path="/integrations" component={Integrations} adminOnly />
-              <ProtectedRoute path="/settings" component={Settings} adminOnly />
-              <Route component={NotFound} />
-            </Switch>
-          </div>
-        </div>
+        {({ match }) => {
+          if (match) {
+            return (
+              <div className="flex h-screen overflow-hidden">
+                <CollapsibleSidebar />
+                <div className="flex-1 flex flex-col overflow-hidden">
+                  <Switch>
+                    <ProtectedRoute path="/" component={Dashboard} />
+                    <ProtectedRoute path="/databases" component={Databases} />
+                    <ProtectedRoute path="/system-health" component={SystemHealth} />
+                    <ProtectedRoute path="/alerts" component={Alerts} />
+                    <ProtectedRoute path="/history" component={History} />
+                    <ProtectedRoute path="/users" component={UserManagement} adminOnly />
+                    <ProtectedRoute path="/groups" component={Groups} />
+                    <ProtectedRoute path="/thresholds" component={Thresholds} />
+                    <ProtectedRoute path="/metrics" component={MetricConfig} />
+                    <ProtectedRoute path="/integrations" component={Integrations} adminOnly />
+                    <ProtectedRoute path="/settings" component={Settings} adminOnly />
+                    <Route component={NotFound} />
+                  </Switch>
+                </div>
+              </div>
+            );
+          }
+          return null;
+        }}
       </Route>
     </Switch>
   );
