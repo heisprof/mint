@@ -42,7 +42,7 @@ import {
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
-import { Plus, UserPlus, UserCog, Edit, Trash2, MoreHorizontal, CheckCircle } from 'lucide-react';
+import { Plus, UserPlus, UserCog, Edit, Trash2, MoreHorizontal, CheckCircle, Key } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -62,10 +62,20 @@ const userFormSchema = insertUserSchema.extend({
 
 type UserFormValues = z.infer<typeof userFormSchema>;
 
+// Password reset schema
+const resetPasswordSchema = z.object({
+  newPassword: z.string().min(6, "Password must be at least 6 characters"),
+  confirmPassword: z.string().min(6, "Confirm password must be at least 6 characters")
+}).refine(data => data.newPassword === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
+
 export default function UserManagement() {
   const [addUserDialogOpen, setAddUserDialogOpen] = useState(false);
   const [editUserDialogOpen, setEditUserDialogOpen] = useState(false);
   const [deleteUserDialogOpen, setDeleteUserDialogOpen] = useState(false);
+  const [resetPasswordDialogOpen, setResetPasswordDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   
   const queryClient = useQueryClient();
@@ -192,6 +202,42 @@ export default function UserManagement() {
     },
   });
   
+  // Reset Password Form
+  const resetPasswordForm = useForm<z.infer<typeof resetPasswordSchema>>({
+    resolver: zodResolver(resetPasswordSchema),
+    defaultValues: {
+      newPassword: '',
+      confirmPassword: '',
+    },
+  });
+  
+  // Reset password mutation
+  const resetPasswordMutation = useMutation({
+    mutationFn: async (data: { userId: number, newPassword: string }) => {
+      const response = await apiRequest('POST', `/api/users/${data.userId}/reset-password`, { 
+        newPassword: data.newPassword 
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/users'] });
+      setResetPasswordDialogOpen(false);
+      setSelectedUser(null);
+      resetPasswordForm.reset();
+      toast({
+        title: 'Password Reset',
+        description: 'The user password has been successfully reset.',
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: 'Error',
+        description: `Failed to reset password: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        variant: 'destructive',
+      });
+    },
+  });
+  
   const onAddUserSubmit = (data: UserFormValues) => {
     const { confirmPassword, ...userData } = data;
     addUserMutation.mutate(userData);
@@ -224,6 +270,15 @@ export default function UserManagement() {
   const handleDeleteUser = () => {
     if (selectedUser) {
       deleteUserMutation.mutate(selectedUser.id);
+    }
+  };
+  
+  const handleResetPassword = (data: z.infer<typeof resetPasswordSchema>) => {
+    if (selectedUser) {
+      resetPasswordMutation.mutate({ 
+        userId: selectedUser.id, 
+        newPassword: data.newPassword 
+      });
     }
   };
   
@@ -307,6 +362,15 @@ export default function UserManagement() {
                             >
                               <Edit className="mr-2 h-4 w-4" />
                               Edit User
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setSelectedUser(user);
+                                setResetPasswordDialogOpen(true);
+                              }}
+                            >
+                              <Key className="mr-2 h-4 w-4" />
+                              Reset Password
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
@@ -611,6 +675,65 @@ export default function UserManagement() {
               {deleteUserMutation.isPending ? 'Deleting...' : 'Delete User'}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Reset Password Dialog */}
+      <Dialog open={resetPasswordDialogOpen} onOpenChange={setResetPasswordDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Reset User Password</DialogTitle>
+            <DialogDescription>
+              Set a new password for user {selectedUser?.username}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <Form {...resetPasswordForm}>
+            <form onSubmit={resetPasswordForm.handleSubmit(handleResetPassword)} className="space-y-4 py-4">
+              <FormField
+                control={resetPasswordForm.control}
+                name="newPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>New Password</FormLabel>
+                    <FormControl>
+                      <Input type="password" placeholder="Enter new password" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={resetPasswordForm.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirm Password</FormLabel>
+                    <FormControl>
+                      <Input type="password" placeholder="Confirm new password" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <DialogFooter className="pt-4">
+                <Button variant="outline" onClick={() => {
+                  resetPasswordForm.reset();
+                  setResetPasswordDialogOpen(false);
+                }}>
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  disabled={resetPasswordMutation.isPending}
+                >
+                  {resetPasswordMutation.isPending ? 'Resetting...' : 'Reset Password'}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
         </DialogContent>
       </Dialog>
     </div>
