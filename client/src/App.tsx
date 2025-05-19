@@ -5,6 +5,8 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeContext } from "@/lib/theme";
+import { AuthProvider } from "@/hooks/use-auth";
+import { ProtectedRoute } from "@/lib/protected-route";
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/Dashboard";
 import Databases from "@/pages/Databases";
@@ -17,36 +19,43 @@ import Thresholds from "@/pages/Thresholds";
 import Integrations from "@/pages/Integrations";
 import Settings from "@/pages/Settings";
 import MetricConfig from "@/pages/MetricConfig";
+import AuthPage from "@/pages/auth-page";
 import CollapsibleSidebar from "@/components/layout/CollapsibleSidebar";
 
 function Router() {
   const [location] = useLocation();
-
+  
   useEffect(() => {
     // Scroll to top on route change
     window.scrollTo(0, 0);
   }, [location]);
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      <CollapsibleSidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Switch>
-          <Route path="/" component={Dashboard} />
-          <Route path="/databases" component={Databases} />
-          <Route path="/system-health" component={SystemHealth} />
-          <Route path="/alerts" component={Alerts} />
-          <Route path="/history" component={History} />
-          <Route path="/users" component={UserManagement} />
-          <Route path="/groups" component={Groups} />
-          <Route path="/thresholds" component={Thresholds} />
-          <Route path="/metrics" component={MetricConfig} />
-          <Route path="/integrations" component={Integrations} />
-          <Route path="/settings" component={Settings} />
-          <Route component={NotFound} />
-        </Switch>
-      </div>
-    </div>
+    <Switch>
+      <Route path="/auth" component={AuthPage} />
+      
+      <Route path="/">
+        <div className="flex h-screen overflow-hidden">
+          <CollapsibleSidebar />
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <Switch>
+              <ProtectedRoute path="/" component={Dashboard} />
+              <ProtectedRoute path="/databases" component={Databases} />
+              <ProtectedRoute path="/system-health" component={SystemHealth} />
+              <ProtectedRoute path="/alerts" component={Alerts} />
+              <ProtectedRoute path="/history" component={History} />
+              <ProtectedRoute path="/users" component={UserManagement} adminOnly />
+              <ProtectedRoute path="/groups" component={Groups} />
+              <ProtectedRoute path="/thresholds" component={Thresholds} />
+              <ProtectedRoute path="/metrics" component={MetricConfig} />
+              <ProtectedRoute path="/integrations" component={Integrations} adminOnly />
+              <ProtectedRoute path="/settings" component={Settings} adminOnly />
+              <Route component={NotFound} />
+            </Switch>
+          </div>
+        </div>
+      </Route>
+    </Switch>
   );
 }
 
@@ -60,12 +69,14 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeContext.Provider value={{ theme, setTheme }}>
-        <TooltipProvider>
-          <Toaster />
-          <Router />
-        </TooltipProvider>
-      </ThemeContext.Provider>
+      <AuthProvider>
+        <ThemeContext.Provider value={{ theme, setTheme }}>
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+          </TooltipProvider>
+        </ThemeContext.Provider>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

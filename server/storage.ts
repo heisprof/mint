@@ -1,5 +1,6 @@
 import { 
   users, type User, type InsertUser,
+  teams, type Team, type InsertTeam,
   groups, type Group, type InsertGroup,
   groupMemberships, type GroupMembership, type InsertGroupMembership,
   databaseTypes, type DatabaseType, type InsertDatabaseType,
@@ -23,9 +24,17 @@ export interface IStorage {
   // User operations
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   listUsers(): Promise<User[]>;
+  getPendingUsers(): Promise<User[]>;
   updateUser(id: number, updates: Partial<InsertUser>): Promise<User | undefined>;
+  updateUserStatus(id: number, status: string): Promise<User | undefined>;
+  
+  // Team operations
+  createTeam(team: InsertTeam): Promise<Team>;
+  getTeam(id: number): Promise<Team | undefined>;
+  listTeams(): Promise<Team[]>;
   
   // Group operations
   createGroup(group: InsertGroup): Promise<Group>;
