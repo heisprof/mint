@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import { 
   LayoutDashboard, 
@@ -11,7 +11,9 @@ import {
   Sliders, 
   Cable, 
   Settings,
-  LogOut
+  LogOut,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/lib/theme';
@@ -39,37 +41,7 @@ const configLinks: SidebarLink[] = [
   { href: '/settings', icon: <Settings size={18} />, label: 'Settings' },
 ];
 
-interface SidebarLinkItemProps {
-  link: SidebarLink;
-  isActive: boolean;
-}
-
-const SidebarLinkItem = ({ link, isActive }: SidebarLinkItemProps) => {
-  return (
-    <li className="mb-1">
-      <Link href={link.href}>
-        <a
-          className={cn(
-            "flex items-center px-4 py-2 text-sm rounded mx-2 transition-colors duration-200",
-            isActive 
-              ? "text-white bg-sidebar-primary" 
-              : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground"
-          )}
-        >
-          <span className="mr-3">{link.icon}</span>
-          {link.label}
-          {link.count !== undefined && (
-            <span className="ml-auto bg-error text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-              {link.count}
-            </span>
-          )}
-        </a>
-      </Link>
-    </li>
-  );
-};
-
-export default function Sidebar() {
+export default function CollapsibleSidebar() {
   const [location] = useLocation();
   const { theme } = useTheme();
   const [collapsed, setCollapsed] = useState(false);
@@ -90,13 +62,10 @@ export default function Sidebar() {
           className="bg-blue-100 hover:bg-blue-200 text-blue-600 p-1 rounded absolute -right-4 top-5 z-10 shadow-md"
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
-          {collapsed ? (
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-          ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-          )}
+          {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
         </button>
       </div>
+      
       {!collapsed && (
         <div className="px-4 py-2 border-b border-blue-200">
           <p className="text-xs text-blue-600 mt-1">

@@ -16,7 +16,7 @@ import Groups from "@/pages/Groups";
 import Thresholds from "@/pages/Thresholds";
 import Integrations from "@/pages/Integrations";
 import Settings from "@/pages/Settings";
-import Sidebar from "@/components/layout/Sidebar";
+import CollapsibleSidebar from "@/components/layout/CollapsibleSidebar";
 
 function Router() {
   const [location] = useLocation();
@@ -28,7 +28,7 @@ function Router() {
 
   return (
     <div className="flex h-screen overflow-hidden">
-      <Sidebar />
+      <CollapsibleSidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Switch>
           <Route path="/" component={Dashboard} />
