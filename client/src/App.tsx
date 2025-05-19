@@ -5,7 +5,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeContext } from "@/lib/theme";
-import { AuthProvider, useAuth } from "@/hooks/use-auth";
+import { AuthProvider } from "@/hooks/use-auth";
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/Dashboard";
 import Databases from "@/pages/Databases";
@@ -23,52 +23,105 @@ import CollapsibleSidebar from "@/components/layout/CollapsibleSidebar";
 
 function Router() {
   const [location] = useLocation();
-  const { user, isLoading } = useAuth();
   
   useEffect(() => {
     // Scroll to top on route change
     window.scrollTo(0, 0);
   }, [location]);
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <span className="animate-spin text-4xl">⌛</span>
-      </div>
-    );
-  }
-
-  // If not logged in and not on auth page, redirect to auth
-  if (!user && location !== "/auth") {
-    return <Redirect to="/auth" />;
-  }
-
   return (
     <Switch>
-      <Route path="/auth">
-        {user ? <Redirect to="/" /> : <AuthPage />}
-      </Route>
-      
-      <Route>
+      <Route path="/auth" component={AuthPage} />
+      <Route path="/">
         <div className="flex h-screen overflow-hidden">
           <CollapsibleSidebar />
           <div className="flex-1 flex flex-col overflow-hidden">
-            <Switch>
-              <Route path="/" exact component={Dashboard} />
-              <Route path="/databases" component={Databases} />
-              <Route path="/system-health" component={SystemHealth} />
-              <Route path="/alerts" component={Alerts} />
-              <Route path="/history" component={History} />
-              <Route path="/users" component={UserManagement} />
-              <Route path="/groups" component={Groups} />
-              <Route path="/thresholds" component={Thresholds} />
-              <Route path="/metrics" component={MetricConfig} />
-              <Route path="/integrations" component={Integrations} />
-              <Route path="/settings" component={Settings} />
-              <Route component={NotFound} />
-            </Switch>
+            <Dashboard />
           </div>
         </div>
+      </Route>
+      <Route path="/databases">
+        <div className="flex h-screen overflow-hidden">
+          <CollapsibleSidebar />
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <Databases />
+          </div>
+        </div>
+      </Route>
+      <Route path="/system-health">
+        <div className="flex h-screen overflow-hidden">
+          <CollapsibleSidebar />
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <SystemHealth />
+          </div>
+        </div>
+      </Route>
+      <Route path="/alerts">
+        <div className="flex h-screen overflow-hidden">
+          <CollapsibleSidebar />
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <Alerts />
+          </div>
+        </div>
+      </Route>
+      <Route path="/history">
+        <div className="flex h-screen overflow-hidden">
+          <CollapsibleSidebar />
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <History />
+          </div>
+        </div>
+      </Route>
+      <Route path="/users">
+        <div className="flex h-screen overflow-hidden">
+          <CollapsibleSidebar />
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <UserManagement />
+          </div>
+        </div>
+      </Route>
+      <Route path="/groups">
+        <div className="flex h-screen overflow-hidden">
+          <CollapsibleSidebar />
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <Groups />
+          </div>
+        </div>
+      </Route>
+      <Route path="/thresholds">
+        <div className="flex h-screen overflow-hidden">
+          <CollapsibleSidebar />
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <Thresholds />
+          </div>
+        </div>
+      </Route>
+      <Route path="/metrics">
+        <div className="flex h-screen overflow-hidden">
+          <CollapsibleSidebar />
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <MetricConfig />
+          </div>
+        </div>
+      </Route>
+      <Route path="/integrations">
+        <div className="flex h-screen overflow-hidden">
+          <CollapsibleSidebar />
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <Integrations />
+          </div>
+        </div>
+      </Route>
+      <Route path="/settings">
+        <div className="flex h-screen overflow-hidden">
+          <CollapsibleSidebar />
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <Settings />
+          </div>
+        </div>
+      </Route>
+      <Route>
+        <NotFound />
       </Route>
     </Switch>
   );
