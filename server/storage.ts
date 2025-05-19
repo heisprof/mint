@@ -135,6 +135,11 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
   
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user;
+  }
+  
   async createUser(user: InsertUser): Promise<User> {
     const [newUser] = await db.insert(users).values(user).returning();
     return newUser;
@@ -144,6 +149,10 @@ export class DatabaseStorage implements IStorage {
     return db.select().from(users);
   }
   
+  async getPendingUsers(): Promise<User[]> {
+    return db.select().from(users).where(eq(users.status, "pending"));
+  }
+  
   async updateUser(id: number, updates: Partial<InsertUser>): Promise<User | undefined> {
     const [updatedUser] = await db
       .update(users)
@@ -151,6 +160,30 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, id))
       .returning();
     return updatedUser;
+  }
+  
+  async updateUserStatus(id: number, status: string): Promise<User | undefined> {
+    const [updatedUser] = await db
+      .update(users)
+      .set({ status })
+      .where(eq(users.id, id))
+      .returning();
+    return updatedUser;
+  }
+  
+  // Team operations
+  async createTeam(team: InsertTeam): Promise<Team> {
+    const [newTeam] = await db.insert(teams).values(team).returning();
+    return newTeam;
+  }
+  
+  async getTeam(id: number): Promise<Team | undefined> {
+    const [team] = await db.select().from(teams).where(eq(teams.id, id));
+    return team;
+  }
+  
+  async listTeams(): Promise<Team[]> {
+    return db.select().from(teams);
   }
   
   // Group operations
