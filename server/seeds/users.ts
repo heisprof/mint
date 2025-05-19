@@ -2,6 +2,7 @@ import { db } from "../db";
 import { users, teams } from "@shared/schema";
 import { log } from "../vite";
 import { hashPassword } from "../auth";
+import { eq } from "drizzle-orm";
 
 export async function seedUsers(): Promise<void> {
   // First check if we need to seed teams
