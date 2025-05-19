@@ -20,6 +20,7 @@ import Settings from "@/pages/Settings";
 import MetricConfig from "@/pages/MetricConfig";
 import AuthPage from "@/pages/auth-page";
 import CollapsibleSidebar from "@/components/layout/CollapsibleSidebar";
+import { ProtectedRoute } from "@/lib/protected-route";
 
 function Router() {
   const [location] = useLocation();
@@ -32,97 +33,18 @@ function Router() {
   return (
     <Switch>
       <Route path="/auth" component={AuthPage} />
-      <Route path="/">
-        <div className="flex h-screen overflow-hidden">
-          <CollapsibleSidebar />
-          <div className="flex-1 flex flex-col overflow-hidden">
-            <Dashboard />
-          </div>
-        </div>
-      </Route>
-      <Route path="/databases">
-        <div className="flex h-screen overflow-hidden">
-          <CollapsibleSidebar />
-          <div className="flex-1 flex flex-col overflow-hidden">
-            <Databases />
-          </div>
-        </div>
-      </Route>
-      <Route path="/system-health">
-        <div className="flex h-screen overflow-hidden">
-          <CollapsibleSidebar />
-          <div className="flex-1 flex flex-col overflow-hidden">
-            <SystemHealth />
-          </div>
-        </div>
-      </Route>
-      <Route path="/alerts">
-        <div className="flex h-screen overflow-hidden">
-          <CollapsibleSidebar />
-          <div className="flex-1 flex flex-col overflow-hidden">
-            <Alerts />
-          </div>
-        </div>
-      </Route>
-      <Route path="/history">
-        <div className="flex h-screen overflow-hidden">
-          <CollapsibleSidebar />
-          <div className="flex-1 flex flex-col overflow-hidden">
-            <History />
-          </div>
-        </div>
-      </Route>
-      <Route path="/users">
-        <div className="flex h-screen overflow-hidden">
-          <CollapsibleSidebar />
-          <div className="flex-1 flex flex-col overflow-hidden">
-            <UserManagement />
-          </div>
-        </div>
-      </Route>
-      <Route path="/groups">
-        <div className="flex h-screen overflow-hidden">
-          <CollapsibleSidebar />
-          <div className="flex-1 flex flex-col overflow-hidden">
-            <Groups />
-          </div>
-        </div>
-      </Route>
-      <Route path="/thresholds">
-        <div className="flex h-screen overflow-hidden">
-          <CollapsibleSidebar />
-          <div className="flex-1 flex flex-col overflow-hidden">
-            <Thresholds />
-          </div>
-        </div>
-      </Route>
-      <Route path="/metrics">
-        <div className="flex h-screen overflow-hidden">
-          <CollapsibleSidebar />
-          <div className="flex-1 flex flex-col overflow-hidden">
-            <MetricConfig />
-          </div>
-        </div>
-      </Route>
-      <Route path="/integrations">
-        <div className="flex h-screen overflow-hidden">
-          <CollapsibleSidebar />
-          <div className="flex-1 flex flex-col overflow-hidden">
-            <Integrations />
-          </div>
-        </div>
-      </Route>
-      <Route path="/settings">
-        <div className="flex h-screen overflow-hidden">
-          <CollapsibleSidebar />
-          <div className="flex-1 flex flex-col overflow-hidden">
-            <Settings />
-          </div>
-        </div>
-      </Route>
-      <Route>
-        <NotFound />
-      </Route>
+      <ProtectedRoute path="/" component={Dashboard} />
+      <ProtectedRoute path="/databases" component={Databases} />
+      <ProtectedRoute path="/system-health" component={SystemHealth} />
+      <ProtectedRoute path="/alerts" component={Alerts} />
+      <ProtectedRoute path="/history" component={History} />
+      <ProtectedRoute path="/users" component={UserManagement} adminOnly />
+      <ProtectedRoute path="/groups" component={Groups} />
+      <ProtectedRoute path="/thresholds" component={Thresholds} />
+      <ProtectedRoute path="/metrics" component={MetricConfig} />
+      <ProtectedRoute path="/integrations" component={Integrations} adminOnly />
+      <ProtectedRoute path="/settings" component={Settings} />
+      <Route component={NotFound} />
     </Switch>
   );
 }
