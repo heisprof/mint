@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/lib/theme';
+import { useAuth } from '@/hooks/use-auth';
 
 interface SidebarLink {
   href: string;
@@ -46,10 +47,15 @@ const configLinks: SidebarLink[] = [
 export default function CollapsibleSidebar() {
   const [location] = useLocation();
   const { theme } = useTheme();
+  const { user, logoutMutation } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
 
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
+  };
+  
+  const handleLogout = () => {
+    logoutMutation.mutate();
   };
 
   return (
@@ -149,17 +155,25 @@ export default function CollapsibleSidebar() {
       <div className="p-4 border-t border-blue-200">
         <div className={cn("flex items-center", collapsed ? "justify-center" : "")}>
           <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
-            A
+            {user?.username.charAt(0).toUpperCase()}
           </div>
           {!collapsed && (
             <div className="ml-3">
-              <p className="text-sm font-medium text-blue-800">Admin User</p>
-              <p className="text-xs text-blue-500">System Administrator</p>
+              <p className="text-sm font-medium text-blue-800">{user?.fullName}</p>
+              <p className="text-xs text-blue-500">{user?.role === 'admin' ? 'System Administrator' : 'User'}</p>
             </div>
           )}
           {!collapsed && (
-            <button className="ml-auto text-blue-500 hover:text-blue-700">
-              <LogOut size={16} />
+            <button 
+              className="ml-auto text-blue-500 hover:text-blue-700"
+              onClick={handleLogout}
+              disabled={logoutMutation.isPending}
+            >
+              {logoutMutation.isPending ? (
+                <span className="animate-spin">⌛</span>
+              ) : (
+                <LogOut size={16} />
+              )}
             </button>
           )}
         </div>
