@@ -85,30 +85,32 @@ export default function CollapsibleSidebar() {
         <ul>
           {mainLinks.map((link) => (
             <li key={link.href} className="mb-1">
-              <Link href={link.href}>
-                <a
-                  className={cn(
-                    "flex items-center px-4 py-2 text-sm rounded mx-2 transition-colors duration-200",
-                    location === link.href
-                      ? "bg-blue-100 text-blue-700" 
-                      : "text-blue-600 hover:bg-blue-100"
-                  )}
-                >
-                  <span className={cn("text-blue-600", collapsed ? "" : "mr-3")}>
-                    {link.icon}
-                  </span>
-                  {!collapsed && (
-                    <>
-                      {link.label}
-                      {link.count !== undefined && (
-                        <span className="ml-auto bg-orange-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                          {link.count}
-                        </span>
-                      )}
-                    </>
-                  )}
-                </a>
-              </Link>
+              <div className="mx-2">
+                <Link href={link.href}>
+                  <div
+                    className={cn(
+                      "flex items-center px-4 py-2 text-sm rounded cursor-pointer transition-colors duration-200",
+                      location === link.href
+                        ? "bg-blue-100 text-blue-700" 
+                        : "text-blue-600 hover:bg-blue-100"
+                    )}
+                  >
+                    <span className={cn("text-blue-600", collapsed ? "" : "mr-3")}>
+                      {link.icon}
+                    </span>
+                    {!collapsed && (
+                      <>
+                        {link.label}
+                        {link.count !== undefined && (
+                          <span className="ml-auto bg-orange-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                            {link.count}
+                          </span>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </Link>
+              </div>
             </li>
           ))}
           
@@ -120,21 +122,23 @@ export default function CollapsibleSidebar() {
           
           {configLinks.map((link) => (
             <li key={link.href} className="mb-1">
-              <Link href={link.href}>
-                <a
-                  className={cn(
-                    "flex items-center px-4 py-2 text-sm rounded mx-2 transition-colors duration-200",
-                    location === link.href
-                      ? "bg-blue-100 text-blue-700" 
-                      : "text-blue-600 hover:bg-blue-100"
-                  )}
-                >
-                  <span className={cn("text-blue-600", collapsed ? "" : "mr-3")}>
-                    {link.icon}
-                  </span>
-                  {!collapsed && link.label}
-                </a>
-              </Link>
+              <div className="mx-2">
+                <Link href={link.href}>
+                  <div
+                    className={cn(
+                      "flex items-center px-4 py-2 text-sm rounded cursor-pointer transition-colors duration-200",
+                      location === link.href
+                        ? "bg-blue-100 text-blue-700" 
+                        : "text-blue-600 hover:bg-blue-100"
+                    )}
+                  >
+                    <span className={cn("text-blue-600", collapsed ? "" : "mr-3")}>
+                      {link.icon}
+                    </span>
+                    {!collapsed && link.label}
+                  </div>
+                </Link>
+              </div>
             </li>
           ))}
         </ul>
