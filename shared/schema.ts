@@ -79,12 +79,71 @@ export const insertDatabaseSchema = createInsertSchema(databases).omit({
   connectionTime: true,
 });
 
+// Available metrics definitions
+export const metricDefinitions = pgTable("metric_definitions", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(),
+  displayName: text("display_name").notNull(),
+  description: text("description"),
+  category: text("category").notNull(), // performance, storage, availability, etc.
+  applicableTo: text("applicable_to").notNull(), // mysql, oracle, both
+  defaultEnabled: boolean("default_enabled").default(false),
+  queryTemplate: text("query_template"),
+  unit: text("unit"), // %, ms, MB, etc.
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertMetricDefinitionSchema = createInsertSchema(metricDefinitions).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Monitoring templates (groups of metrics)
+export const monitoringTemplates = pgTable("monitoring_templates", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(),
+  description: text("description"),
+  createdBy: integer("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertMonitoringTemplateSchema = createInsertSchema(monitoringTemplates).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Template metrics (metrics included in a template)
+export const templateMetrics = pgTable("template_metrics", {
+  id: serial("id").primaryKey(),
+  templateId: integer("template_id").notNull().references(() => monitoringTemplates.id),
+  metricId: integer("metric_id").notNull().references(() => metricDefinitions.id),
+});
+
+export const insertTemplateMetricSchema = createInsertSchema(templateMetrics).omit({
+  id: true,
+});
+
+// Database metric configurations (which metrics are enabled for a database)
+export const databaseMetrics = pgTable("database_metrics", {
+  id: serial("id").primaryKey(),
+  databaseId: integer("database_id").notNull().references(() => databases.id),
+  metricId: integer("metric_id").notNull().references(() => metricDefinitions.id),
+  enabled: boolean("enabled").default(true),
+  customQuery: text("custom_query"), // Optional custom query overriding the default
+  collectInterval: integer("collect_interval"), // Custom collection interval in minutes
+});
+
+export const insertDatabaseMetricSchema = createInsertSchema(databaseMetrics).omit({
+  id: true,
+});
+
 // Thresholds for alerting
 export const thresholds = pgTable("thresholds", {
   id: serial("id").primaryKey(),
   databaseId: integer("database_id").references(() => databases.id),
   groupId: integer("group_id").references(() => groups.id), // For group-level thresholds
-  metricName: text("metric_name").notNull(), // cpu, disk, connection_time, etc.
+  metricId: integer("metric_id").references(() => metricDefinitions.id),
+  metricName: text("metric_name").notNull(), // For backward compatibility
   warningThreshold: real("warning_threshold"), // Percentage or absolute value
   criticalThreshold: real("critical_threshold"), // Percentage or absolute value
   enabled: boolean("enabled").default(true),
@@ -213,3 +272,15 @@ export type InsertEmailTemplate = z.infer<typeof insertEmailTemplateSchema>;
 
 export type ItsdIntegration = typeof itsdIntegration.$inferSelect;
 export type InsertItsdIntegration = z.infer<typeof insertItsdIntegrationSchema>;
+
+export type MetricDefinition = typeof metricDefinitions.$inferSelect;
+export type InsertMetricDefinition = z.infer<typeof insertMetricDefinitionSchema>;
+
+export type MonitoringTemplate = typeof monitoringTemplates.$inferSelect;
+export type InsertMonitoringTemplate = z.infer<typeof insertMonitoringTemplateSchema>;
+
+export type TemplateMetric = typeof templateMetrics.$inferSelect;
+export type InsertTemplateMetric = z.infer<typeof insertTemplateMetricSchema>;
+
+export type DatabaseMetric = typeof databaseMetrics.$inferSelect;
+export type InsertDatabaseMetric = z.infer<typeof insertDatabaseMetricSchema>;

@@ -431,6 +431,199 @@ export async function registerRoutes(app: Express): Promise<Server> {
       handleError(res, error);
     }
   });
+  
+  // Metric definition routes
+  app.get('/api/metric-definitions', async (req: Request, res: Response) => {
+    try {
+      const metrics = await storage.listMetricDefinitions();
+      res.json(metrics);
+    } catch (error) {
+      handleError(res, error);
+    }
+  });
+  
+  app.get('/api/metric-definitions/:id', async (req: Request, res: Response) => {
+    try {
+      const metricId = parseInt(req.params.id);
+      const metric = await storage.getMetricDefinition(metricId);
+      
+      if (!metric) {
+        return res.status(404).json({ message: 'Metric definition not found' });
+      }
+      
+      res.json(metric);
+    } catch (error) {
+      handleError(res, error);
+    }
+  });
+  
+  app.post('/api/metric-definitions', async (req: Request, res: Response) => {
+    try {
+      const metricData = insertMetricDefinitionSchema.parse(req.body);
+      const metric = await storage.createMetricDefinition(metricData);
+      res.status(201).json(metric);
+    } catch (error) {
+      handleError(res, error);
+    }
+  });
+
+  // Monitoring template routes
+  app.get('/api/monitoring-templates', async (req: Request, res: Response) => {
+    try {
+      const templates = await storage.listMonitoringTemplates();
+      res.json(templates);
+    } catch (error) {
+      handleError(res, error);
+    }
+  });
+  
+  app.get('/api/monitoring-templates/:id', async (req: Request, res: Response) => {
+    try {
+      const templateId = parseInt(req.params.id);
+      const template = await storage.getMonitoringTemplate(templateId);
+      
+      if (!template) {
+        return res.status(404).json({ message: 'Monitoring template not found' });
+      }
+      
+      // Get metrics associated with this template
+      const templateMetrics = await storage.getTemplateMetrics(templateId);
+      
+      res.json({
+        ...template,
+        metrics: templateMetrics
+      });
+    } catch (error) {
+      handleError(res, error);
+    }
+  });
+  
+  app.post('/api/monitoring-templates', async (req: Request, res: Response) => {
+    try {
+      const { metricIds, ...templateData } = req.body;
+      const parsedData = insertMonitoringTemplateSchema.parse(templateData);
+      
+      // Create the template
+      const template = await storage.createMonitoringTemplate(parsedData);
+      
+      // Associate metrics with the template
+      if (metricIds && Array.isArray(metricIds)) {
+        for (const metricId of metricIds) {
+          await storage.addMetricToTemplate({
+            templateId: template.id,
+            metricId
+          });
+        }
+      }
+      
+      res.status(201).json(template);
+    } catch (error) {
+      handleError(res, error);
+    }
+  });
+
+  // Database metrics routes
+  app.get('/api/databases/:id/metrics', async (req: Request, res: Response) => {
+    try {
+      const databaseId = parseInt(req.params.id);
+      const metrics = await storage.getDatabaseMetrics(databaseId);
+      res.json(metrics);
+    } catch (error) {
+      handleError(res, error);
+    }
+  });
+  
+  app.post('/api/databases/:id/metrics', async (req: Request, res: Response) => {
+    try {
+      const databaseId = parseInt(req.params.id);
+      const { metrics } = req.body;
+      
+      if (!metrics || !Array.isArray(metrics)) {
+        return res.status(400).json({ message: 'Invalid metrics data' });
+      }
+      
+      // Get existing metrics for this database
+      const existingMetrics = await storage.getDatabaseMetrics(databaseId);
+      
+      // Process each metric
+      for (const metric of metrics) {
+        const { metricId, enabled, customQuery, collectInterval } = metric;
+        
+        const existing = existingMetrics.find(m => m.metricId === metricId);
+        
+        if (existing) {
+          // Update existing metric
+          await storage.updateDatabaseMetric(existing.id, {
+            enabled,
+            customQuery,
+            collectInterval
+          });
+        } else {
+          // Create new metric
+          await storage.createDatabaseMetric({
+            databaseId,
+            metricId,
+            enabled,
+            customQuery,
+            collectInterval
+          });
+        }
+      }
+      
+      // Get updated metrics
+      const updatedMetrics = await storage.getDatabaseMetrics(databaseId);
+      res.json(updatedMetrics);
+    } catch (error) {
+      handleError(res, error);
+    }
+  });
+  
+  // Apply monitoring template to databases
+  app.post('/api/apply-template', async (req: Request, res: Response) => {
+    try {
+      const { templateId, databaseIds } = req.body;
+      
+      if (!templateId || !databaseIds || !Array.isArray(databaseIds)) {
+        return res.status(400).json({ message: 'Invalid request data' });
+      }
+      
+      // Get template metrics
+      const templateMetrics = await storage.getTemplateMetrics(parseInt(templateId));
+      
+      if (templateMetrics.length === 0) {
+        return res.status(404).json({ message: 'No metrics found for this template' });
+      }
+      
+      // Apply template to each database
+      for (const databaseId of databaseIds) {
+        // Get existing metrics for this database
+        const existingMetrics = await storage.getDatabaseMetrics(databaseId);
+        
+        // Process each metric from the template
+        for (const templateMetric of templateMetrics) {
+          const existing = existingMetrics.find(m => m.metricId === templateMetric.metricId);
+          
+          if (existing) {
+            // Update existing metric
+            await storage.updateDatabaseMetric(existing.id, {
+              enabled: true
+            });
+          } else {
+            // Create new metric
+            await storage.createDatabaseMetric({
+              databaseId,
+              metricId: templateMetric.metricId,
+              enabled: true
+            });
+          }
+        }
+      }
+      
+      res.json({ success: true, message: 'Template applied successfully' });
+    } catch (error) {
+      handleError(res, error);
+    }
+  });
 
   const httpServer = createServer(app);
 
