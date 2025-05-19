@@ -2,14 +2,29 @@ import { pgTable, text, serial, integer, boolean, timestamp, jsonb, real, foreig
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Teams table
+export const teams = pgTable("teams", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull().unique(),
+  description: text("description"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertTeamSchema = createInsertSchema(teams).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Users table
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
-  email: text("email").notNull(),
+  email: text("email").notNull().unique(),
   fullName: text("full_name").notNull(),
+  teamId: integer("team_id").references(() => teams.id),
   role: text("role").notNull().default("user"), // admin, user
+  status: text("status").notNull().default("pending"), // pending, approved, rejected
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -284,3 +299,6 @@ export type InsertTemplateMetric = z.infer<typeof insertTemplateMetricSchema>;
 
 export type DatabaseMetric = typeof databaseMetrics.$inferSelect;
 export type InsertDatabaseMetric = z.infer<typeof insertDatabaseMetricSchema>;
+
+export type Team = typeof teams.$inferSelect;
+export type InsertTeam = z.infer<typeof insertTeamSchema>;
