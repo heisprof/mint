@@ -12,7 +12,11 @@ import {
   insertThresholdSchema,
   insertFileSystemSchema,
   insertEmailTemplateSchema,
-  insertItsdIntegrationSchema
+  insertItsdIntegrationSchema,
+  insertMetricDefinitionSchema,
+  insertMonitoringTemplateSchema,
+  insertTemplateMetricSchema,
+  insertDatabaseMetricSchema
 } from "@shared/schema";
 import { oracleMonitor } from "./services/oracleMonitor";
 import { filesystemMonitor } from "./services/filesystemMonitor";
