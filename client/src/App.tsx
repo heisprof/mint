@@ -20,6 +20,7 @@ import Settings from "@/pages/Settings";
 import MetricConfig from "@/pages/MetricConfig";
 import AuthPage from "@/pages/auth-page";
 import { ProtectedRoute } from "@/lib/protected-route";
+import CollapsibleSidebar from "@/components/layout/CollapsibleSidebar";
 
 function Router() {
   const [location] = useLocation();
