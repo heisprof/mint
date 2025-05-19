@@ -31,7 +31,8 @@ import {
   ArrowRight,
   RefreshCcw,
   TestTube2,
-  LifeBuoy
+  LifeBuoy,
+  FileEdit as Edit
 } from 'lucide-react';
 import {
   Table,
